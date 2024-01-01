@@ -1,19 +1,29 @@
 use std::fmt;
 
 pub enum DataType {
-    Int(i32),
-    Float(f64),
-    Text(String),
+    Int(Vec<i32>),
+    Float(Vec<f64>),
+    Text(Vec<String>),
+}
+
+pub struct Array {
+    data: DataType,
+}
+
+impl Array {
+    pub fn new(data: DataType) -> Self {
+        Self { data }
+    }
 }
 
 pub struct Column {
     name: String,
-    data: Vec<DataType>,
+    array: Array,
 }
 
 impl Column {
-    pub fn new(name: String, data: Vec<DataType>) -> Self {
-        Self { name, data }
+    pub fn new(name: String, array: Array) -> Self {
+        Self { name, array }
     }
 }
 
@@ -31,14 +41,30 @@ impl fmt::Display for Table {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         for column in &self.columns {
             write!(f, "{}: ", column.name)?;
-            for (index, data) in column.data.iter().enumerate() {
-                match data {
-                    DataType::Int(value) => write!(f, "{}", value)?,
-                    DataType::Float(value) => write!(f, "{}", value)?,
-                    DataType::Text(value) => write!(f, "{}", value)?,
+            match &column.array.data {
+                DataType::Int(values) => {
+                    for (index, value) in values.iter().enumerate() {
+                        write!(f, "{}", value)?;
+                        if index < values.len() - 1 {
+                            write!(f, ", ")?;
+                        }
+                    }
                 }
-                if index < column.data.len() - 1 {
-                    write!(f, ", ")?;
+                DataType::Float(values) => {
+                    for (index, value) in values.iter().enumerate() {
+                        write!(f, "{}", value)?;
+                        if index < values.len() - 1 {
+                            write!(f, ", ")?;
+                        }
+                    }
+                }
+                DataType::Text(values) => {
+                    for (index, value) in values.iter().enumerate() {
+                        write!(f, "{}", value)?;
+                        if index < values.len() - 1 {
+                            write!(f, ", ")?;
+                        }
+                    }
                 }
             }
             write!(f, "\n")?;
