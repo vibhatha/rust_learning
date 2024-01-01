@@ -21,6 +21,10 @@ fn create_table() {
 
     let table = Table::new(vec![column1, column2, column3]);
     println!("{}", table.to_string());
+
+    let column = table.get_column("C1").unwrap();
+    println!("{}", column.get_name());
+    println!("{}", column.get_array());
 }
 
 fn main() {

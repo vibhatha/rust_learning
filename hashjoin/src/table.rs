@@ -25,6 +25,14 @@ impl Column {
     pub fn new(name: String, array: Array) -> Self {
         Self { name, array }
     }
+
+    pub fn get_name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn get_array(&self) -> &Array {
+        &self.array
+    }
 }
 
 pub struct Table {
@@ -34,6 +42,15 @@ pub struct Table {
 impl Table {
     pub fn new(columns: Vec<Column>) -> Self {
         Self { columns }
+    }
+
+    pub fn get_column(&self, name: &str) -> Option<&Column> {
+        for column in &self.columns {
+            if column.name == name {
+                return Some(column);
+            }
+        }
+        None
     }
 }
 
@@ -68,6 +85,38 @@ impl fmt::Display for Table {
                 }
             }
             write!(f, "\n")?;
+        }
+        Ok(())
+    }
+}
+
+impl fmt::Display for Array {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self.data {
+            DataType::Int(values) => {
+                for (index, value) in values.iter().enumerate() {
+                    write!(f, "{}", value)?;
+                    if index < values.len() - 1 {
+                        write!(f, ", ")?;
+                    }
+                }
+            }
+            DataType::Float(values) => {
+                for (index, value) in values.iter().enumerate() {
+                    write!(f, "{}", value)?;
+                    if index < values.len() - 1 {
+                        write!(f, ", ")?;
+                    }
+                }
+            }
+            DataType::Text(values) => {
+                for (index, value) in values.iter().enumerate() {
+                    write!(f, "{}", value)?;
+                    if index < values.len() - 1 {
+                        write!(f, ", ")?;
+                    }
+                }
+            }
         }
         Ok(())
     }
