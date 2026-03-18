@@ -16,3 +16,8 @@ hello_cargo/target/
 guessing_game/target
 
 hashjoin/target
+
+# Compiled executables and debugging symbols
+hello/main
+**/*.dSYM
+main
