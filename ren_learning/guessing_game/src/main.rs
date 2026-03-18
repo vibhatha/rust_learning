@@ -10,28 +10,40 @@ fn main() {
 
     // println!("The secret number is {secret_number}");
 
-    println!("Please input your guess.");
+    loop {
+        println!("Please input your guess.");
 
-    let mut guess = String::new();
+        let mut guess = String::new();
 
-    let result = io::stdin().read_line(&mut guess);
+        let result = io::stdin().read_line(&mut guess);
 
-    let guess: u32 = guess.trim().parse().expect("Please type a number!");
+        let guess: u32 = match guess.trim().parse() {
+            Ok(num) => num,
+            Err(_) => {
+                println!("Invalid input {guess}");
+                continue;
+            },
+        };
 
-    match result {
-        Ok(bytes) => println!("Successfully read {} bytes.", bytes),
-        Err(e) => println!("Error: {}", e),
+        match result {
+            Ok(bytes) => println!("Successfully read {} bytes.", bytes),
+            Err(e) => println!("Error: {}", e),
+        }
+
+        println!("You guessed: {guess}");
+
+        match guess.cmp(&secret_number) {
+        Ordering::Less => println!("Too small!"),
+        Ordering::Equal => {
+            println!("You win");
+            break;
+        },
+        Ordering::Greater => println!("Too big!"),
+        }
+
+        println!("The secret number is {secret_number}");
+
     }
-
-    println!("You guessed: {guess}");
-
-    match guess.cmp(&secret_number) {
-	Ordering::Less => println!("Too small!"),
-	Ordering::Equal => println!("You win!"),
-	Ordering::Greater => println!("Too big!"),
-    }
-
-    println!("The secret number is {secret_number}");
 
     println!("End of the game");
 }
