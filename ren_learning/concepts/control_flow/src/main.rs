@@ -11,6 +11,10 @@ fn main() {
 
     let loop_result = basic_loop(3, 4);
     println!("Loop Result: {loop_result}");
+
+    complex_loop(5);
+
+    print_triangle_with_loop(5);
 }
 
 fn basic_control_flow(x: i32) -> bool {
@@ -41,4 +45,43 @@ fn basic_loop(break_value: i32, coeff: i32) -> i32 {
         }
     };
     result
+}
+
+fn complex_loop(height: i32) {
+    let mut outer_loop_counter: i32 = 0;
+    'outer_loop: loop {
+        println!("Outer loop counter: {outer_loop_counter}");
+        let mut inner_loop_counter: i32 = 0;
+        'inner_loop: loop {
+            println!("\tInner loop counter: {inner_loop_counter}");
+            inner_loop_counter += 1;
+            if inner_loop_counter == height {
+                break 'inner_loop;
+            }
+        }
+        outer_loop_counter += 1;
+        if outer_loop_counter == height {
+            break 'outer_loop;
+        }
+    }
+}
+
+fn print_triangle_with_loop(height: i32) {
+    let mut i: i32 = 0;
+    'outer_loop: loop {
+        let mut j: i32 = 0;
+        'inner_loop: loop {
+            if i >= j {
+                print!("*");
+            } else {
+                break 'inner_loop;
+            }
+            j += 1;
+        }
+        println!();
+        i += 1;
+        if i == height {
+            break 'outer_loop;
+        }
+    }
 }
