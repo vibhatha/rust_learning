@@ -15,6 +15,23 @@ fn main() {
     complex_loop(5);
 
     print_triangle_with_loop(5);
+
+    simple_loop_return();
+}
+
+fn simple_loop_return () {
+    println!("Simple Loop Return");
+    let mut counter = 0;
+
+    let result = loop {
+        counter += 1;
+
+        if counter == 10 {
+            break counter * 2;
+        }
+    };
+
+    println!("The result is {result}");
 }
 
 fn basic_control_flow(x: i32) -> bool {
