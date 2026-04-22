@@ -15,3 +15,5 @@ Cargo.lock
 hello/main
 **/*.dSYM
 main
+
+.DS_Store
