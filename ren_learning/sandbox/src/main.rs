@@ -6,6 +6,20 @@ fn main() {
     println!("Subtraction");
     z = subtract(12, 10);
     println!("The subtract return {}", z);
+
+    let config_max = Some(3_u8);
+    if let Some(max) = config_max {
+        println!("The maximum is {max}");
+    } else {
+        println!("Not a valid max value");
+    }
+
+    enum Coin {
+
+    }
+
+    println!("The max via unwrap {}", config_max.unwrap());
+
 }
 
 pub fn hello_rust() {
