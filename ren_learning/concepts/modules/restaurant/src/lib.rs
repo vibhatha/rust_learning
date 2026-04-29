@@ -48,9 +48,21 @@ mod mansion {
 
 }
 
-
 pub fn use_mansion() {
     crate::mansion::guest_house_1::room1();
     crate::mansion::guest_house_2::room2();
+}
+
+mod A1 {                
+    pub mod A2 {       
+        pub fn f1() {} 
+    }                  
+}
+
+mod B1 {
+    use crate::A1::A2;       
+    pub fn f1() {
+        A2::f1();
+    }
 }
 
