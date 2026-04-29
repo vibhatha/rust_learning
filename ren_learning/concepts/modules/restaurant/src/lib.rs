@@ -17,7 +17,14 @@ mod mansion {
     
     fn access_entrance_corridor() {}
     fn access_guest_house() {
+        // this will compile with error
+        // the reason is the ancestor module
+        // is trying to access a module which is private
+        // and also the method/function is also private. 
+        // The child modules can use ancestor modules or 
+        // funtions but not the other way. 
         guest_house_1::room1();
+        // this will compile fine
         guest_house_2::room2();
     }
 
