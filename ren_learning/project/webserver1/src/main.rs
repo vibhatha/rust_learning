@@ -2,12 +2,45 @@ use std::{
     error::{Error},
     fs,
     io::{BufReader, prelude::*},
-    net::{TcpListener, TcpStream}
+    net::{TcpListener, TcpStream},
+    thread,
+    time::Duration,
 };
 
 enum ServerStatus {
     Success(TcpListener),
     Error(String),
+}
+
+pub struct ThreadPool {
+    threads: Vec<thread::JoinHandle<()>>,
+}
+
+impl ThreadPool {
+    /// Create a new ThreadPool.
+    ///
+    /// The size is the number of threads in the pool.
+    ///
+    /// # Panics
+    ///
+    /// The `new` function will panic if the size is zero.
+    pub fn new(size: usize) -> ThreadPool {
+        assert!(size > 0);
+
+        let mut threads = Vec::with_capacity(size);
+        for _ in 0..size {
+            // create some threads and store them in a vector
+        }
+
+        ThreadPool { threads }
+    }
+
+    pub fn execute<F>(&self, f: F) 
+    where
+        F: FnOnce() + Send + 'static,
+    {
+
+    }
 }
 
 fn start_server(host: &String, port: &String) -> ServerStatus {
@@ -27,24 +60,32 @@ fn start_server(host: &String, port: &String) -> ServerStatus {
     }
 }
 
+fn thread_pool_init(num_threads: usize) -> ThreadPool {
+    ThreadPool::new(num_threads)
+}
+
 fn main() {
     let host = String::from("127.0.0.1");
     let port = String::from("7878");
     let status: ServerStatus = start_server(&host, &port);
+    let num_threads: usize = 4;
+    let pool = thread_pool_init(num_threads);
 
     match status {
         ServerStatus::Success(listener) => {
             println!("Server Ready to accept connections...");
             for stream in listener.incoming() {
                 let stream = stream.unwrap();
-                match handle_connection(stream) {
-                    Ok(()) => {
-                        println!("Connection successfully handled!");
+                pool.execute(|| {
+                    match handle_connection(stream) {
+                        Ok(()) => {
+                            println!("Connection successfully handled!");
+                        }
+                        Err(error) => {
+                            eprintln!("Connection handling failed: {}", error);
+                        }
                     }
-                    Err(error) => {
-                        eprintln!("Connection handling failed: {}", error);
-                    }
-                }
+                });
             }
         }
         ServerStatus::Error(msg) => {
@@ -54,14 +95,17 @@ fn main() {
 }
 
 
-fn handle_connection(mut stream: TcpStream) -> Result<(), Box<dyn Error>> {
+fn handle_connection(mut stream: TcpStream) -> std::result::Result<(), Box<dyn std::error::Error>> {
     let buf_reader = BufReader::new(&stream);
     let request_line = buf_reader.lines().next().ok_or("Empty request")??;
 
-    let (status_line, filename) = if request_line == "GET / HTTP/1.1" {
-        ("HTTP/1.1 200 OK", "data/hello.html")
-    } else {
-        ("HTTP/1.1 404 NOT FOUND", "data/404.html")
+    let (status_line, filename) = match &request_line[..] {
+        "GET / HTTP/1.1" => ("HTTP/1.1 200 OK", "data/hello.html"),
+        "GET /sleep HTTP/1.1" => {
+            thread::sleep(Duration::from_secs(5));
+            ("HTTP/1.1 200 OK", "data/hello_sleep.html")
+        }
+        _ => ("HTTP/1.1 404 NOT FOUND", "data/404.html"),
     };
 
     let contents = fs::read_to_string(filename)?;
@@ -70,6 +114,6 @@ fn handle_connection(mut stream: TcpStream) -> Result<(), Box<dyn Error>> {
     let response =
         format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}");
 
-    stream.write_all(response.as_bytes()).unwrap();
+    stream.write_all(response.as_bytes())?;
     Ok(())
 }
