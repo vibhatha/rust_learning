@@ -1,5 +1,4 @@
 use std::{
-    error::{Error},
     fs,
     io::{BufReader, prelude::*},
     net::{TcpListener, TcpStream},
@@ -42,11 +41,13 @@ fn main() {
     let status: ServerStatus = start_server(&host, &port);
     let num_threads: usize = 4;
     let pool = thread_pool_init(num_threads);
+    const MAX_REQUESTS: usize = 5;
+    println!("Note: This WebServer Will Shutdown after {} requests", MAX_REQUESTS);
 
     match status {
         ServerStatus::Success(listener) => {
             println!("Server Ready to accept connections...");
-            for stream in listener.incoming() {
+            for stream in listener.incoming().take(MAX_REQUESTS) {
                 let stream = stream.unwrap();
                 pool.execute(|| {
                     match handle_connection(stream) {
@@ -59,6 +60,7 @@ fn main() {
                     }
                 });
             }
+            println!("Shutting Down!");
         }
         ServerStatus::Error(msg) => {
             eprintln!("Server setup failed: {}", msg);
