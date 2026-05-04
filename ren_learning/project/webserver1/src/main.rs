@@ -1,6 +1,5 @@
-use log::debug;
-
 use std::{
+    error::{Error},
     fs,
     io::{BufReader, prelude::*},
     net::{TcpListener, TcpStream}
@@ -38,33 +37,39 @@ fn main() {
             println!("Server Ready to accept connections...");
             for stream in listener.incoming() {
                 let stream = stream.unwrap();
-                handle_connection(stream);
+                match handle_connection(stream) {
+                    Ok(()) => {
+                        println!("Connection successfully handled!");
+                    }
+                    Err(error) => {
+                        eprintln!("Connection handling failed: {}", error);
+                    }
+                }
             }
         }
         ServerStatus::Error(msg) => {
             eprintln!("Server setup failed: {}", msg);
         }
     }
-    
 }
 
 
-fn handle_connection(mut stream: TcpStream) {
+fn handle_connection(mut stream: TcpStream) -> Result<(), Box<dyn Error>> {
     let buf_reader = BufReader::new(&stream);
-    let http_request: Vec<_> = buf_reader
-        .lines()
-        .map(|result| result.unwrap())
-        .take_while(|line| !line.is_empty())
-        .collect();
+    let request_line = buf_reader.lines().next().ok_or("Empty request")??;
 
-    debug!("Received HTTP Request: {:#?}", http_request);
+    let (status_line, filename) = if request_line == "GET / HTTP/1.1" {
+        ("HTTP/1.1 200 OK", "data/hello.html")
+    } else {
+        ("HTTP/1.1 404 NOT FOUND", "data/404.html")
+    };
 
-    let status_line = "HTTP/1.1 200 OK";
-    let contents = fs::read_to_string("data/hello.html").unwrap();
+    let contents = fs::read_to_string(filename)?;
     let length = contents.len();
 
     let response =
         format!("{status_line}\r\nContent-Length: {length}\r\n\r\n{contents}");
 
     stream.write_all(response.as_bytes()).unwrap();
+    Ok(())
 }
