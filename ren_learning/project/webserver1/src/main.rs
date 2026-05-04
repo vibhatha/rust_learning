@@ -1,3 +1,5 @@
+use log::debug;
+
 use std::{
     fs,
     io::{BufReader, prelude::*},
@@ -54,6 +56,8 @@ fn handle_connection(mut stream: TcpStream) {
         .map(|result| result.unwrap())
         .take_while(|line| !line.is_empty())
         .collect();
+
+    debug!("Received HTTP Request: {:#?}", http_request);
 
     let status_line = "HTTP/1.1 200 OK";
     let contents = fs::read_to_string("data/hello.html").unwrap();
