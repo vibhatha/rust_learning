@@ -1,11 +1,11 @@
-use crate::executor::worker;
+use crate::executor::worker::Worker;
 
 use std::{sync::{Arc, Mutex, mpsc}};
 
 pub type Job = Box<dyn FnOnce() + Send + 'static>;
 
 pub struct ThreadPool {
-    workers: Vec<worker::Worker>,
+    workers: Vec<Worker>,
     sender: Option<mpsc::Sender<Job>>,
 }
 
@@ -27,7 +27,7 @@ impl ThreadPool {
         let mut workers = Vec::with_capacity(size);
 
         for id in 0..size {
-            workers.push(worker::Worker::new(id, Arc::clone(&receiver)));
+            workers.push(Worker::new(id, Arc::clone(&receiver)));
         }
 
         ThreadPool {

@@ -9,6 +9,7 @@ pub enum ServerStatus {
 }
 
 pub struct WebServer {
+    /// A simple webserver configuration
     host: String,
     port: String,
 }
@@ -16,6 +17,7 @@ pub struct WebServer {
 impl WebServer {
 
     pub fn new(host: String, port: String) -> WebServer {
+        // Create a simple webserver
         WebServer {
             host,
             port,
@@ -23,8 +25,9 @@ impl WebServer {
     }
 
     pub fn start_server(self) -> ServerStatus {
-    // Good if we can validate the host and port
-    let address = format!("{}:{}", self.host, self.port);
+        // Start Web Server
+
+        let address = format!("{}:{}", self.host, self.port);
         match TcpListener::bind(&address) {
             Ok(listener) => {
                 println!("Sever successfully connected to {address}");
