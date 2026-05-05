@@ -6,30 +6,10 @@ use std::{
     time::Duration,
 };
 
-enum ServerStatus {
-    Success(TcpListener),
-    Error(String),
-}
+use webserver1::executor::thread_pool::ThreadPool;
+use webserver1::network::server::WebServer;
+use webserver1::network::server::ServerStatus;
 
-use webserver1::ThreadPool;
-
-
-fn start_server(host: &String, port: &String) -> ServerStatus {
-    // Good if we can validate the host and port
-    let address = format!("{}:{}", host, port);
-    match TcpListener::bind(&address) {
-        Ok(listener) => {
-            println!("Sever successfully connected to {address}");
-            ServerStatus::Success(listener)
-        }
-        Err(error) => {
-            let error_msg = format!(
-                "Failed to start server at address {}: since {}", address, error
-                );
-            ServerStatus::Error(error_msg)
-        }
-    }
-}
 
 fn thread_pool_init(num_threads: usize) -> ThreadPool {
     ThreadPool::new(num_threads)
@@ -38,7 +18,8 @@ fn thread_pool_init(num_threads: usize) -> ThreadPool {
 fn main() {
     let host = String::from("127.0.0.1");
     let port = String::from("7878");
-    let status: ServerStatus = start_server(&host, &port);
+    let webserver = WebServer::new(host, port);
+    let status: ServerStatus = webserver.start_server();
     let num_threads: usize = 4;
     let pool = thread_pool_init(num_threads);
     const MAX_REQUESTS: usize = 5;
